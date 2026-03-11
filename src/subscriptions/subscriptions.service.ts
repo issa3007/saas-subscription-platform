@@ -11,6 +11,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { Subscription } from './entities/subscription.entity';
 import { Company } from '../companies/entities/company.entity';
 import { Plan } from '../plans/entities/plan.entity';
+import { PlanName } from 'src/subscriptions/dto/change-plan.dto';
 import { handleServiceError } from '../common/utils/database-error.handler';
 
 @Injectable()
@@ -29,7 +30,10 @@ export class SubscriptionsService {
   ) {}
 
   async createFreeSubscription(companyId: string): Promise<Subscription> {
-    this.logger.log('Creating free subscription', this.context);
+    this.logger.log(
+      `Creating free subscription for company ${companyId}`,
+      this.context,
+    );
 
     try {
       const company = await this.companyRepo.findOne({
@@ -41,7 +45,7 @@ export class SubscriptionsService {
       }
 
       const freePlan = await this.planRepo.findOne({
-        where: { name: 'free' },
+        where: { name: PlanName.FREE },
       });
 
       if (!freePlan) {
@@ -89,9 +93,12 @@ export class SubscriptionsService {
 
   async changePlan(
     companyId: string,
-    planName: 'free' | 'basic' | 'premium',
+    planName: PlanName,
   ): Promise<Subscription> {
-    this.logger.log(`Changing plan to ${planName}`, this.context);
+    this.logger.log(
+      `Changing company ${companyId} plan to ${planName}`,
+      this.context,
+    );
 
     try {
       const subscription = await this.getCompanySubscription(companyId);
@@ -119,14 +126,7 @@ export class SubscriptionsService {
   }
 
   async validateUserLimit(companyId: string): Promise<void> {
-    const subscription = await this.subscriptionRepo.findOne({
-      where: { company: { id: companyId } },
-      relations: ['plan'],
-    });
-
-    if (!subscription) {
-      throw new NotFoundException('Subscription not found');
-    }
+    const subscription = await this.getCompanySubscription(companyId);
 
     const plan = subscription.plan;
 
@@ -145,10 +145,12 @@ export class SubscriptionsService {
 
       const plan = subscription.plan;
 
+      if (plan.name === PlanName.PREMIUM) {
+        return;
+      }
+
       if (subscription.currentFileCount >= plan.fileLimit) {
-        if (plan.name !== 'premium') {
-          throw new ForbiddenException('File upload limit reached');
-        }
+        throw new ForbiddenException('File upload limit reached');
       }
     } catch (error) {
       handleServiceError(
@@ -161,30 +163,26 @@ export class SubscriptionsService {
   }
 
   async incrementUserCount(companyId: string): Promise<void> {
-    const subscription = await this.subscriptionRepo.findOne({
-      where: { company: { id: companyId } },
-    });
+    const result = await this.subscriptionRepo.increment(
+      { company: { id: companyId } },
+      'currentUserCount',
+      1,
+    );
 
-    if (!subscription) {
+    if (!result.affected) {
       throw new NotFoundException('Subscription not found');
     }
-
-    subscription.currentUserCount += 1;
-
-    await this.subscriptionRepo.save(subscription);
   }
 
   async incrementFileCount(companyId: string): Promise<void> {
-    const subscription = await this.subscriptionRepo.findOne({
-      where: { company: { id: companyId } },
-    });
+    const result = await this.subscriptionRepo.increment(
+      { company: { id: companyId } },
+      'currentFileCount',
+      1,
+    );
 
-    if (!subscription) {
+    if (!result.affected) {
       throw new NotFoundException('Subscription not found');
     }
-
-    subscription.currentFileCount += 1;
-
-    await this.subscriptionRepo.save(subscription);
   }
 }

@@ -1,4 +1,5 @@
 import { Company } from 'src/companies/entities/company.entity';
+import { FileVisibility } from 'src/files/dto/upload-file.dto';
 import { FileAccess } from 'src/files/entities/file.access.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
@@ -21,8 +22,12 @@ export class FileEntity {
   @Column()
   path: string;
 
-  @Column({ type: 'enum', enum: ['all', 'restricted'] })
-  visibility: 'all' | 'restricted';
+  @Column({
+    type: 'enum',
+    enum: FileVisibility,
+    default: FileVisibility.ALL,
+  })
+  visibility: FileVisibility;
 
   @ManyToOne(() => Company, (company) => company.files, {
     onDelete: 'CASCADE',

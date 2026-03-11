@@ -17,11 +17,14 @@ import { FilesService } from './files.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { SetAccessDto } from 'src/files/dto/set-access.dto';
+import { UpdateVisibilityDto } from 'src/files/dto/update-visibility.dto';
 
 @ApiTags('Files')
 @ApiBearerAuth()
@@ -29,12 +32,6 @@ import {
 @UseGuards(JwtAuthGuard)
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
-
-  // @Post('upload')
-  // @UseInterceptors(FileInterceptor('file'))
-  // uploadFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
-  //   return this.filesService.uploadFile(file, req.user.companyId, req.user.sub);
-  // }
 
   @Get()
   @ApiOperation({ summary: 'Get all company files' })
@@ -45,6 +42,12 @@ export class FilesController {
   getFiles(@Req() req: any) {
     return this.filesService.getCompanyFiles(req.user.companyId);
   }
+
+  // @Post('upload')
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
+  //   return this.filesService.uploadFile(file, req.user.companyId, req.user.sub);
+  // }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete file' })
@@ -67,8 +70,9 @@ export class FilesController {
     name: 'id',
     example: '10',
   })
-  changeVisibility(@Param('id') id: string, @Body() body: any) {
-    return this.filesService.changeVisibility(id, body.visibility);
+  @ApiBody({ type: UpdateVisibilityDto })
+  changeVisibility(@Param('id') id: string, @Body() dto: UpdateVisibilityDto) {
+    return this.filesService.changeVisibility(id, dto.visibility);
   }
 
   @Patch(':id/access')
@@ -77,7 +81,8 @@ export class FilesController {
     name: 'id',
     example: '10',
   })
-  setAccess(@Param('id') id: string, @Body() body: { userIds: string[] }) {
-    return this.filesService.setRestrictedAccess(id, body.userIds);
+  @ApiBody({ type: SetAccessDto })
+  setAccess(@Param('id') id: string, @Body() dto: SetAccessDto) {
+    return this.filesService.setRestrictedAccess(id, dto.userIds);
   }
 }

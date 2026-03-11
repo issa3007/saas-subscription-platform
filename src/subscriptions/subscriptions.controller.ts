@@ -1,9 +1,17 @@
 import { Controller, Get, Patch, Body, Req, UseGuards } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
+import { ChangePlanDto } from './dto/change-plan.dto';
 
 @ApiTags('Subscriptions')
+@ApiBearerAuth()
 @Controller('subscriptions')
 @UseGuards(JwtAuthGuard)
 export class SubscriptionsController {
@@ -21,14 +29,12 @@ export class SubscriptionsController {
 
   @Patch('change-plan')
   @ApiOperation({ summary: 'Change company subscription plan' })
+  @ApiBody({ type: ChangePlanDto })
   @ApiResponse({
     status: 200,
     description: 'Subscription plan changed',
   })
-  changePlan(
-    @Req() req: any,
-    @Body() body: { plan: 'free' | 'basic' | 'premium' },
-  ) {
-    return this.subscriptionsService.changePlan(req.user.companyId, body.plan);
+  changePlan(@Req() req: any, @Body() dto: ChangePlanDto) {
+    return this.subscriptionsService.changePlan(req.user.companyId, dto.plan);
   }
 }
