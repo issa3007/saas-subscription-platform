@@ -1,10 +1,10 @@
-SaaS Subscription Platform (NestJS)
+# SaaS Subscription Platform (NestJS)
 
 REST API backend for SaaS platform where companies can register, manage employees, upload files and use subscription plans.
 
 The system supports company accounts, employee invitations, file access control and subscription-based billing.
 
-Tech Stack
+# Tech Stack
 
 NestJS
 
@@ -14,7 +14,7 @@ TypeORM
 
 MySQL
 
-Infrastructure
+# Infrastructure
 
 AWS S3 
 
@@ -22,12 +22,9 @@ JWT Authentication
 
 Winston Logger
 
-Tools
-
-Postman
 
 
-Features
+# Features
 
 Authentication
 
