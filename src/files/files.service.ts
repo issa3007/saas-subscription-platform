@@ -8,12 +8,12 @@ import type { LoggerService } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileEntity } from './entities/file.entity';
+// import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 // import { AwsS3Service } from 'src/aws-s3/aws-s3.service';
 import { FileAccess } from './entities/file.access.entity';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { handleServiceError } from '../common/utils/database-error.handler';
 import { FileVisibility } from 'src/files/dto/upload-file.dto';
-// import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 
 @Injectable()
 export class FilesService {

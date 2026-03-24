@@ -8,6 +8,7 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { MailService } from '../mail/mail.service';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import type { LoggerService } from '@nestjs/common';
+import { RegisterCompanyDto } from 'src/auth/dto/register-company.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,7 @@ export class AuthService {
     private readonly logger: LoggerService,
   ) {}
 
-  async register(dto: any) {
+  async register(dto: RegisterCompanyDto) {
     this.logger.log('Registering company', this.context);
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
